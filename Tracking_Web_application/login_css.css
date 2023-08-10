@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&family=Caveat:wght@400;700&family=Lobster&family=Monoton&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display+SC:ital,wght@0,400;0,700;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Source+Sans+Pro:ital,wght@0,400;0,700;1,700&family=Work+Sans:ital,wght@0,400;0,700;1,700&display=swap');
+
+.bgcontainer{
+  background-color: #EBF5FB;
+  text-align: center;
+  height: 100vh;
+}
+.bgcontainer1{
+  background-color: #EBF5FB;
+  height: 100vh;
+}
+.image{
+  height: 200px;
+  width: 200px;
+}
+.bg2{
+    background-color: #4799FA;
+    color: white;
+    height: 40px;
+    width: 400px;
+    text-align: start;
+    padding-top: 5px;
+    font-size: 20px;
+    margin-left: 20px;
+    border-radius: 7px;
+    padding-left: 9px;
+}
+.bg1{
+  font-size: 25px;
+  text-align: start;
+  margin-left: 580px;
+}
+
+.bg{
+  padding-top: 8px;
+}
+
+.button{
+  height:40px;
+  width:100px;
+  border-radius: 8px;
+  background-color: #4799FA;
+  color: white;
+  border-color: #4799FA;
+
+}
+.t{
+  margin-top: 20px;
+}
+.bg3{
+font-size: 20px;
+margin-top: 8px;
+margin-left: 10px 
+}

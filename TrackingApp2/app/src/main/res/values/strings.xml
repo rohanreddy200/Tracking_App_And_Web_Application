@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Tracking-App</string>
+    <string name="login_to_continue">login_to_continue</string>
+    <string name="employee_id">employee_id</string>
+    <string name="enter_employee_id">enter_employee_id</string>
+    <string name="Enter_employee_id">Enter_employee_id</string>
+    <string name="Password">Password</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="Login">login</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="task_1">Task-1</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="checklist">Checklist</string>
+    <string name="done">Done</string>
+    <string name="Enter_Employee_ID">Enter Employee ID</string>
+    <string name="Employee_ID">Employee ID</string>
+    <string name="longitude">Longitude</string>
+    <string name="update">Update</string>
+    <string name="latitude">Latitude</string>
+    <string name="tasks">Tasks</string>
+    <string name="location_tracking">Location Tracking</string>
+    <string name="homepage">Homepage</string>
+    <string name="start_location">Start Location</string>
+    <string name="stop_location">Stop Location</string>
+    <string name="route_details">Route details</string>
+    <string name="Route_details">Route Details</string>
+    <string name="route_details1">Route Details</string>
+</resources>

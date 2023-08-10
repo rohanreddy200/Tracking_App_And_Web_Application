@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+    crossorigin="anonymous">
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+    defer
+    integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+    crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="adding.css" /> 
+    <link rel="stylesheet" type="text/css" href="login_css.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <title>Add Routes</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <div class="bgcontainer">
+    <h1>Add Routes</h1>
+    <div class="form">
+    <form id="routeForm">
+        <div class="date">
+        <label for="dateInput">Date (yyyy-MM-dd):</label>
+        <input type="text" class="bg7" id="dateInput" required /><br><br>
+        </div>
+        <div class="employee">
+        <label for="employeeId">Employee ID:</label>
+        <input type="text" class="bg7" id="employeeId" required /><br><br>
+    </div>
+    <div class="from">
+        <label for="fromInput">From:</label>
+        <input type="text" class="bg7" id="fromInput" required /><br><br>
+    </div>
+    <div class="to">
+        <label for="toInput">To:</label>
+        <input type="text" class="bg7" id="toInput" required /><br><br>
+    </div>
+        <input type="submit" class="button1" value="Add Route" />
+    </form>
+</div>
+</div>
+    <script>
+        // Initialize Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyB81eEdJaTBDXmsC3HlM0um9jwhJJ-6mMY",
+            authDomain: "tracking-app-4f610.firebaseapp.com",
+            databaseURL: "https://tracking-app-4f610-default-rtdb.firebaseio.com",
+            projectId: "tracking-app-4f610",
+            messagingSenderId: "276178787209",
+            appId: "1:276178787209:android:3c16c88961f7b5381fdf58"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase database reference
+        var database = firebase.database().ref("routes");
+
+        // Handle form submission
+        document.getElementById("routeForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent form from submitting
+
+            // Get form values
+            var date = document.getElementById("dateInput").value;
+            var employeeId = document.getElementById("employeeId").value;
+            var from = document.getElementById("fromInput").value;
+            var to = document.getElementById("toInput").value;
+
+            // Check if the route already exists for the specified date and employee ID
+            database.child(date).child(employeeId).once("value")
+                .then(function(snapshot) {
+                    var routeData = snapshot.val();
+
+                    if (routeData) {
+                        // Route already exists for the specified date and employee ID
+                        var existingFrom = routeData.from;
+                        var existingTo = routeData.to;
+
+                        if (date < getCurrentDate()) {
+                            // Entered date is older
+                            console.log("Route is already completed for the specified date.");
+                            alert("Route is already completed for the specified date.");
+                        } else {
+                            // Update the route for the specified date and employee ID
+                            database.child(date).child(employeeId).update({
+                                from: from,
+                                to: to
+                            })
+                            .then(function() {
+                                console.log("Route updated successfully.");
+                                alert("Route updated successfully.");
+                                // Reset the form
+                                document.getElementById("routeForm").reset();
+                            })
+                            .catch(function(error) {
+                                console.error("Error updating route:", error);
+                                alert("Error updating route. Please try again.");
+                            });
+                        }
+                    } else {
+                        // Create a new route for the specified date and employee ID
+                        database.child(date).child(employeeId).set({
+                            from: from,
+                            to: to
+                        })
+                        .then(function() {
+                            console.log("Route added successfully.");
+                            alert("Route added successfully.");
+                            // Reset the form
+                            document.getElementById("routeForm").reset();
+                        })
+                        .catch(function(error) {
+                            console.error("Error adding route:", error);
+                            alert("Error adding route. Please try again.");
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    console.error("Error retrieving route:", error);
+                    alert("Error retrieving route. Please try again.");
+                });
+        });
+
+        // Function to get the current date in yyyy-MM-dd format
+        function getCurrentDate() {
+            var today = new Date();
+            var year = today.getFullYear();
+            var month = String(today.getMonth() + 1).padStart(2, "0");
+            var day = String(today.getDate()).padStart(2, "0");
+            return year + "-" + month + "-" + day;
+        }
+    </script>
+</body>
+</html>

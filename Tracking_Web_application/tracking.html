@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Application</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+
+        #map {
+            height: calc(100% - 40px); /* Adjust height to accommodate search bar and button */
+            width: 100%;
+            position: absolute;
+            top: 80px; /* Adjust top value to accommodate search bar and button */
+        }
+
+        #searchContainer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            margin-left: 500px;
+        }
+
+        #searchInput {
+            margin-right: 10px;
+        }
+
+        #routeText {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            font-weight: bold;
+        }
+
+        #routeText span,
+        #routeInfo span {
+            color: #3366ff;
+        }
+
+        #routeInfo {
+            position: absolute;
+            top: 40px;
+            left: 30px;
+            font-weight: bold;
+        }
+    </style>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+</head>
+<body>
+    <div id="searchContainer">
+        <input type="text" id="searchInput" placeholder="Enter employee ID" />
+        <input type="text" id="dateInput" placeholder="Enter date (yyyy-MM-dd)" />
+        <button onclick="searchEmployee()">Search</button>
+    </div>
+    <div id="map"></div>
+    <p id="routeText">Route: <span></span></p>
+    <p id="routeInfo">Route Info: <span></span></p>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Initialize Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyB81eEdJaTBDXmsC3HlM0um9jwhJJ-6mMY",
+            authDomain: "tracking-app-4f610.firebaseapp.com",
+            databaseURL: "https://tracking-app-4f610-default-rtdb.firebaseio.com",
+            projectId: "tracking-app-4f610",
+            messagingSenderId: "276178787209",
+            appId: "1:276178787209:android:3c16c88961f7b5381fdf58"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase database reference
+        var database = firebase.database().ref();
+
+        // Mapbox access token
+        mapboxgl.accessToken = 'pk.eyJ1Ijoicm9oYW4tMjk4IiwiYSI6ImNsandtenN1NTAyZTgzZG1vZjB2cW1mcWoifQ.vNgpgjKc3Rs22A_fLe-JgA';
+
+        // Mapbox initialization
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [0, 0],
+            zoom: 2
+        });
+
+        // Array to store markers
+        var markers = [];
+
+        // Arrays to store layer and source IDs for polylines
+        var layerIds = [];
+        var sourceIds = [];
+
+        // Function to remove all markers from the map
+        function removeMarkers() {
+            markers.forEach(function(marker) {
+                marker.remove();
+            });
+            markers = [];
+        }
+
+        // Function to remove all polylines from the map
+        function removePolylines() {
+            layerIds.forEach(function(layerId) {
+                map.removeLayer(layerId);
+            });
+            sourceIds.forEach(function(sourceId) {
+                map.removeSource(sourceId);
+            });
+            layerIds = [];
+            sourceIds = [];
+        }
+
+        // Function to perform reverse geocoding and get the location name
+        async function getLocationName(coordinates) {
+            try {
+                const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${mapboxgl.accessToken}`);
+                const data = await response.json();
+                return data.features[0].place_name;
+            } catch (error) {
+                console.log("Error in reverse geocoding:", error);
+                return null;
+            }
+        }
+
+        // Function to get directions between two coordinates using Mapbox Directions API
+        async function getDirections(startCoords, endCoords) {
+            const apiKey = 'pk.eyJ1Ijoicm9oYW4tMjk4IiwiYSI6ImNsandtenN1NTAyZTgzZG1vZjB2cW1mcWoifQ.vNgpgjKc3Rs22A_fLe-JgA';
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${startCoords.longitude},${startCoords.latitude};${endCoords.longitude},${endCoords.latitude}?geometries=geojson&access_token=${apiKey}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.routes[0].geometry.coordinates;
+            } catch (error) {
+                console.error("Error in fetching directions:", error);
+                return null;
+            }
+        }
+
+        // Function to draw the route (polylines) on the map
+        function drawRoute(routeCoordinates, routeSourceId, routeLayerId) {
+            // Create a GeoJSON feature
+            var feature = {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'LineString',
+                    coordinates: routeCoordinates
+                }
+            };
+
+            // Create a GeoJSON source for the route and add it to the map
+            map.addSource(routeSourceId, {
+                type: 'geojson',
+                data: feature
+            });
+
+            // Create a layer with the GeoJSON source and add it to the map
+            map.addLayer({
+                id: routeLayerId,
+                type: 'line',
+                source: routeSourceId,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#ff0000', // Red color for the route
+                    'line-width': 4,
+                    'line-opacity': 0.8
+                }
+            });
+
+            // Store the layer and source IDs for later removal
+            layerIds.push(routeLayerId);
+            sourceIds.push(routeSourceId);
+        }
+
+        // Function to update the route information in the "routeInfo" div
+        function updateRouteInfo(from, to) {
+            var routeInfo = document.getElementById('routeInfo');
+            routeInfo.innerHTML = "Route Info: <span>" + from + " - " + to + "</span>";
+        }
+
+        // Function to search for an employee's locations and draw route
+        async function searchEmployee() {
+            var employeeId = document.getElementById('searchInput').value;
+            var date = document.getElementById('dateInput').value;
+
+            // Remove existing markers and polylines from the map
+            removeMarkers();
+            removePolylines();
+
+            // Retrieve location data from Firebase Realtime Database for the specified employee ID
+            var locationPath = "locations/employee/" + employeeId + "/" + date;
+            var routePath = "routes/" + date + "/" + employeeId;
+
+            console.log("Retrieving location data for employee ID:", employeeId);
+
+            database.child(locationPath).once('value', async function(snapshot) {
+                database.child(routePath).once('value', async function(routeSnapshot) {
+                    console.log("Location Snapshot:", snapshot.val());
+                    console.log("Route Snapshot:", routeSnapshot.val())
+
+                    var coordinates = [];
+                    var from = '';
+                    var to = '';
+
+                    // Retrieve "from" and "to" values from the route snapshot
+                    routeSnapshot.forEach(function(childSnapshot) {
+                        var key = childSnapshot.key;
+                        var value = childSnapshot.val();
+
+                        if (key === "from") {
+                            from = value;
+                        } else if (key === "to") {
+                            to = value;
+                        }
+                    });
+
+                    // Display the route text with start and end location names
+                    var routeText = document.getElementById('routeText');
+                    routeText.innerHTML = "Route: <span>" + from + " - " + to + "</span>";
+
+                    // Update the route information in the "routeInfo" div
+                    updateRouteInfo(from, to);
+
+                    snapshot.forEach(function(childSnapshot) {
+                        childSnapshot.forEach(function(randomNameSnapshot) {
+
+                            var file = randomNameSnapshot.val();
+                            var latitude = file.latitude;
+                            var longitude = file.longitude;
+
+                            console.log("Latitude:", latitude);
+                            console.log("Longitude:", longitude);
+
+                            // Check if the coordinates are valid
+                            if (!isNaN(latitude) && !isNaN(longitude)) {
+                                // Create a marker
+                                var marker = new mapboxgl.Marker()
+                                    .setLngLat([longitude, latitude])
+                                    .addTo(map);
+                                markers.push(marker);
+
+                                // Add coordinates for polyline
+                                coordinates.push([longitude, latitude]);
+                            } else {
+                                console.log("Invalid coordinates:", latitude, longitude);
+                            }
+                        });
+                    });
+
+                    if (coordinates.length > 0) {
+                        // Get the location names for the first and last coordinates
+                        const fromName = await getLocationName(coordinates[0]);
+                        const toName = await getLocationName(coordinates[coordinates.length - 1]);
+
+                        // Update the route text with start and end location names
+                        routeText.innerHTML = "Route: <span>" + fromName + " - " + toName + "</span>";
+
+                        // Create a unique source ID and layer ID based on date and employee ID
+                        var routeSourceId = 'route-source-' + date + '-' + employeeId;
+                        var routeLayerId = 'route-layer-' + date + '-' + employeeId;
+
+                        // Get the starting and ending coordinates from the routeSnapshot
+                        var fromCoords = routeSnapshot.child("from_coordinates").val();
+                        var toCoords = routeSnapshot.child("to_coordinates").val();
+
+                        // Get the directions (route) between the starting and ending coordinates
+                        var routeCoordinates = await getDirections(fromCoords, toCoords);
+
+                        if (routeCoordinates) {
+                            // Draw the route (polylines) on the map
+                            drawRoute(routeCoordinates, routeSourceId, routeLayerId);
+
+                            // Fit the map to the markers and the route
+                            var bounds = new mapboxgl.LngLatBounds();
+                            markers.forEach(function(marker) {
+                                bounds.extend(marker.getLngLat());
+                            });
+                            routeCoordinates.forEach(function(coord) {
+                                bounds.extend(coord);
+                            });
+                            map.fitBounds(bounds, { padding: 50 });
+                        } else {
+                            console.log("Failed to get route directions.");
+                        }
+                    } else {
+                        console.log("No valid coordinates found.");
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

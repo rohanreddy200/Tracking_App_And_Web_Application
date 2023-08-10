@@ -1,0 +1,120 @@
+.container{
+    text-align: center;
+    background-color: #EBF5FB;
+    height: 100vh;
+   width:300vmax;
+}
+.employeeid{
+    
+    margin-right: 50px;
+}
+.form{
+    margin-top: 15px;
+}
+
+.password{
+    margin-right: 20px;
+}
+.border{
+    border-radius: 5px;
+    border-width: 40px;
+}
+
+.button1{
+    height:40px;
+    width:130px;
+    border-radius: 8px;
+    background-color: #4799FA;
+    color: white;
+    border-color: #4799FA;
+  }
+
+  .routesearch{
+    margin-top: 20px;
+    margin-right:60px
+  }
+
+  .button2{
+    height:40px;
+    width:150px;
+    border-radius: 8px;
+    background-color: #4799FA;
+    color: white;
+    border-color: #4799FA;
+  
+  }
+
+  .button3{
+    height:40px;
+    width:150px;
+    margin-top:20px;
+    border-radius: 8px;
+    background-color: #4799FA;
+    color: white;
+    border-color: #4799FA;
+  
+  }
+  .bg7{
+    background-color: #4799FA;
+    color: white;
+    height: 33px;
+    width: 200px;
+    font-size: 20px;
+    border-radius: 7px;
+    border-width: 0px;
+}
+
+.bg8{
+    background-color: #4799FA;
+    color: white;
+    height: 40px;
+    text-align: center;
+    width: 250px;
+    font-size: 20px;
+    border-radius: 7px;
+    border-width: 0px;
+    margin-left: 180px;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+
+.bg9{
+    background-color: #4799FA;
+    color: white;
+    height: 40px;
+    text-align: center;
+    width: 250px;
+    font-size: 20px;
+    border-radius: 7px;
+    border-width: 0px;
+    margin-left: 180px;
+    margin-top: 20px;
+    margin-right: 160px;
+}
+
+
+
+.date{
+    margin-right:70px;
+}
+
+.employee{
+    margin-right:20px;
+}
+
+.from{
+    margin-left: 30px;
+}
+.to{
+    margin-left: 40px;
+}
+
+.ex{
+    background-color: #EBF5FB;
+    height: 100vh;
+}
+
+.list{
+    margin: 10px;
+    padding: 10px
+}
